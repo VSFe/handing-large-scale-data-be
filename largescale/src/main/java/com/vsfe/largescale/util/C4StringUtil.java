@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.helpers.MessageFormatter;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class C4StringUtil {
@@ -27,5 +28,15 @@ public class C4StringUtil {
             }
         }
         return StringUtils.EMPTY;
+    }
+
+    /**
+     * 형식과 객체가 주어졌을 때, 해당 형식에 맞춰 객체를 배치한다.
+     * @param format
+     * @param objects
+     * @return
+     */
+    public static String format(String format, Object... objects) {
+        return MessageFormatter.format(format, objects).getMessage();
     }
 }

@@ -1,8 +1,12 @@
 package com.vsfe.largescale.controller;
 
+import com.vsfe.largescale.domain.Transaction;
 import com.vsfe.largescale.domain.User;
+import com.vsfe.largescale.model.type.TransactionSearchOption;
 import com.vsfe.largescale.service.LargeScaleService;
 import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -33,22 +37,30 @@ public class LargeScaleController {
     /**
      * Step 2. 페이징을 활용한 쿼리 최적화 방식에 대해 고민해 봅시다.
      */
-    public void getTransactions() {
-
+    @GetMapping("/get-transactions")
+    public List<Transaction> getTransactions(
+        @RequestParam @NotEmpty String accountNumber,
+        @RequestParam(required = false) String pageToken,
+        @RequestParam @NotNull TransactionSearchOption option,
+        @RequestParam @Positive @Max(100) int count
+    ) {
+        return largeScaleService.getTransactions(accountNumber, pageToken, option, count);
     }
 
     /**
      * Step 3. Full Scan 을 수행해야 하는 로직은 어떻게 수행해야 할까요?
      */
-    public void validateAccountNumber() {
-
+    @GetMapping("/validate-account")
+    public void validateAccountNumber(@RequestParam int pageSize) {
+        largeScaleService.validateAccountNumber(pageSize);
     }
 
     /**
      * Step 4. 통계성 집계를 병렬로 수행해 봅시다.
      */
+    @GetMapping("/aggregate-transactions")
     public void aggregateTransactions() {
-
+        largeScaleService.aggregateTransactions();
     }
 
     /**
