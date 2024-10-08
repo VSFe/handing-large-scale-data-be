@@ -2,6 +2,7 @@ package com.vsfe.largescale.domain;
 
 import java.time.Instant;
 
+import com.vsfe.largescale.util.C4StringUtil;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -51,4 +52,8 @@ public class User {
 	@Column(name = "update_date", nullable = false)
 	private Instant updateDate;
 
+	@Override
+	public String toString() {
+		return C4StringUtil.reflectionToString(this);
+	}
 }
