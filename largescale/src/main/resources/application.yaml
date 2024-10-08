@@ -1,9 +1,11 @@
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    username: # 추후 공지
-    password: # 추후 공지
-    url: # 추후 공지
+    username: ${DB_USER_ID}
+    password: ${DB_PASSWORD}
+    url: jdbc:mysql://${DB_URL}/large-scale?socketTimeout=2000
+    hikari:
+      connection-timeout: 3000
   jpa:
     show-sql: true
     hibernate:
@@ -12,3 +14,4 @@ spring:
       hibernate:
         format_sql: true
         use_sql_comments: true
+        dialect: org.hibernate.dialect.MySQLDialect
