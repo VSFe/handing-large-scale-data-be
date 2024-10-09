@@ -3,6 +3,7 @@ package com.vsfe.largescale.service;
 import com.vsfe.largescale.domain.Account;
 import com.vsfe.largescale.domain.Transaction;
 import com.vsfe.largescale.domain.User;
+import com.vsfe.largescale.model.PageInfo;
 import com.vsfe.largescale.model.type.TransactionSearchOption;
 import com.vsfe.largescale.repository.AccountRepository;
 import com.vsfe.largescale.repository.TransactionRepository;
@@ -43,8 +44,12 @@ public class LargeScaleService {
      * @param count
      * @return
      */
-    public List<Transaction> getTransactions(String accountNumber, String pageToken, TransactionSearchOption option, int count) {
-        return null;
+    public PageInfo<Transaction> getTransactions(String accountNumber, String pageToken, TransactionSearchOption option, int count) {
+        if (pageToken == null) {
+            return transactionRepository.findTransactionWithoutPageToken(accountNumber, option, count);
+        } else {
+            return transactionRepository.findTransactionWithPageToken(accountNumber, pageToken, option, count);
+        }
     }
 
     /**
@@ -53,7 +58,7 @@ public class LargeScaleService {
      * @param pageSize
      */
     public void validateAccountNumber(int pageSize) {
-        C4QueryExecuteTemplate.<Account>selectAndExecuteWithCursorAndPageLimit(100, 1000,
+        C4QueryExecuteTemplate.<Account>selectAndExecuteWithCursorAndPageLimit(pageSize, 1000,
             lastAccount -> accountRepository.findAccountByLastAccountId(lastAccount == null ? null : lastAccount.getId(), 1000),
             accounts -> accounts.forEach(this::validateAccount)
         );

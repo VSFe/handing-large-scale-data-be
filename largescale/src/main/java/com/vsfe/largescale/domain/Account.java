@@ -76,7 +76,7 @@ public class Account {
 
 		var secondPartsSum = getValidateSum(accountTokens[1]);
 		var thirdPartsSum = getValidateSum(accountTokens[2].substring(0, accountTokens[2].length() - 1));
-		return (secondPartsSum + thirdPartsSum) % 10 == (accountTokens[2].charAt(accountTokens[2].length() - 1));
+		return (secondPartsSum + thirdPartsSum) % 10 == (accountTokens[2].charAt(accountTokens[2].length() - 1) - '0');
 	}
 
 	private int getValidateSum(String accountNumberPart) {

@@ -37,6 +37,6 @@ public class C4StringUtil {
      * @return
      */
     public static String format(String format, Object... objects) {
-        return MessageFormatter.format(format, objects).getMessage();
+        return MessageFormatter.arrayFormat(format, objects).getMessage();
     }
 }

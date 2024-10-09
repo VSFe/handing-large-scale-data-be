@@ -2,6 +2,7 @@ package com.vsfe.largescale.controller;
 
 import com.vsfe.largescale.domain.Transaction;
 import com.vsfe.largescale.domain.User;
+import com.vsfe.largescale.model.PageInfo;
 import com.vsfe.largescale.model.type.TransactionSearchOption;
 import com.vsfe.largescale.service.LargeScaleService;
 import jakarta.validation.constraints.Max;
@@ -38,7 +39,7 @@ public class LargeScaleController {
      * Step 2. 페이징을 활용한 쿼리 최적화 방식에 대해 고민해 봅시다.
      */
     @GetMapping("/get-transactions")
-    public List<Transaction> getTransactions(
+    public PageInfo<Transaction> getTransactions(
         @RequestParam @NotEmpty String accountNumber,
         @RequestParam(required = false) String pageToken,
         @RequestParam @NotNull TransactionSearchOption option,
