@@ -1,10 +1,24 @@
 package com.vsfe.largescale.repository;
 
-import com.vsfe.largescale.domain.User;
-import org.springframework.data.jpa.repository.JpaRepository;
+import java.util.List;
+
 import org.springframework.stereotype.Repository;
 
-@Repository
-public interface UserRepository extends JpaRepository<User, Long> {
+import com.vsfe.largescale.domain.User;
 
+import lombok.RequiredArgsConstructor;
+
+@Repository
+@RequiredArgsConstructor
+public class UserRepository {
+	private final UserJpaRepository userJpaRepository;
+
+	/**
+	 * 최근에 가입한 유저의 목록을 가져온다.
+	 * @param count
+	 * @return
+	 */
+	public List<User> findRecentCreatedUsers(int count) {
+		return userJpaRepository.findRecentCreatedUsers(count);
+	}
 }

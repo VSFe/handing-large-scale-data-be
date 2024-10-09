@@ -1,8 +1,23 @@
 package com.vsfe.largescale.controller;
 
+import java.util.List;
+
+import com.vsfe.largescale.domain.Transaction;
+import com.vsfe.largescale.domain.User;
+import com.vsfe.largescale.model.PageInfo;
+import com.vsfe.largescale.model.type.TransactionSearchOption;
 import com.vsfe.largescale.service.LargeScaleService;
+
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.data.domain.Page;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -18,15 +33,22 @@ public class LargeScaleController {
     /**
      * Step 1. 기본적인 쿼리의 최적화를 수행해 봅시다.
      */
-    public void getUserInfo() {
-
+    @GetMapping("/user-info")
+    public List<User> getUserInfo(@RequestParam @Positive @Max(100) int count) {
+        return largeScaleService.getUserInfo(count);
     }
 
     /**
      * Step 2. 페이징을 활용한 쿼리 최적화 방식에 대해 고민해 봅시다.
      */
-    public void getTransactions() {
-
+    @GetMapping("/get-transactions")
+    public PageInfo<Transaction> getTransactions(
+        @RequestParam @NotEmpty String accountNumber,
+        @RequestParam(required = false) String pageToken,
+        @RequestParam @NotNull TransactionSearchOption option,
+        @RequestParam @Positive @Max(100) int count
+    ) {
+        return largeScaleService.getTransactions(accountNumber, pageToken, option, count);
     }
 
     /**
