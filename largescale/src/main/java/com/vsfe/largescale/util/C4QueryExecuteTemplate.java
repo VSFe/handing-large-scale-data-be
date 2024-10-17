@@ -66,13 +66,17 @@ public class C4QueryExecuteTemplate {
     /**
      * Cursor Paging 을 적용하여 select 를 수행한 후, 조회된 결과로 비즈니스 로직을 수행한다.
      * 단, iteration 횟수가 pageLimit 에 도달한 경우 중단한다.
-     * @param pageLimit
+     * @param pageLimit 실행 횟수 제한 (음수인 경우, 제한 없음)
      * @param limit
      * @param selectFunction
      * @param resultConsumer
      * @param <T>
      */
     public static <T> void selectAndExecuteWithCursorAndPageLimit(int pageLimit, int limit, Function<T, List<T>> selectFunction, Consumer<List<T>> resultConsumer) {
+        if (pageLimit < 0) {
+            selectAndExecuteWithCursor(limit, selectFunction, resultConsumer);
+        }
+
         var iterationCount = 0;
         List<T> resultList = null;
         do {

@@ -58,4 +58,17 @@ public interface TransactionJpaRepository extends JpaRepository<Transaction, Lon
 		@Param("id") int id,
 		@Param("limit") int limit
 	);
+
+	@Query(value = """
+	SELECT SUM(t.)
+	FROM :tableName t
+	WHERE t.id > :id
+	ORDER BY t.id ASC
+	LIMIT :limit
+	""", nativeQuery = true)
+	Long getaiksdasdkjfaslhdjf(
+		@Param("tableName") String tableName,
+		@Param("id") int id,
+		@Param("limit") int limit
+	);
 }

@@ -57,11 +57,11 @@ public class LargeScaleController {
     }
 
     /**
-     * Step 4. 통계성 집계를 병렬로 수행해 봅시다.
+     * Step 4. 병렬 처리를 사용한 마이그레이션 작업을 수행해 봅시다.
      */
-    @GetMapping("/aggregate-transactions")
-    public void aggregateTransactions() {
-        largeScaleService.aggregateTransactions();
+    @GetMapping("/migrate-data")
+    public void migrateData() {
+        largeScaleService.migrateData();
     }
 
     /**
