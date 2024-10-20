@@ -54,15 +54,17 @@ public class LargeScaleController {
     /**
      * Step 3. Full Scan 을 수행해야 하는 로직은 어떻게 수행해야 할까요?
      */
-    public void validateAccountNumber() {
-
+    @GetMapping("/validate-account")
+    public void validateAccountNumber(@RequestParam int pageSize) {
+        largeScaleService.validateAccountNumber(pageSize);
     }
 
     /**
-     * Step 4. 통계성 집계를 병렬로 수행해 봅시다.
+     * Step 4. 병렬 처리를 사용한 마이그레이션 작업 수행
      */
-    public void aggregateTransactions() {
-
+    @GetMapping("/migrate-data")
+    public void migrateData(@RequestParam int pageSize) {
+        largeScaleService.migrateData(pageSize);
     }
 
     /**

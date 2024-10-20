@@ -8,6 +8,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
+
 @Repository
 public interface UserJpaRepository extends JpaRepository<User, Long> {
 	User findByUsername(String username);
@@ -20,4 +23,17 @@ public interface UserJpaRepository extends JpaRepository<User, Long> {
 	LIMIT :count
 	""")
 	List<User> findRecentCreatedUsers(@Param("count") int count);
+
+	// index: pk
+	@Query("""
+    SELECT u
+    FROM User u
+    WHERE u.id > :lastUserId
+    ORDER BY u.id
+    LIMIT :count
+    """)
+	List<User> findUsersWithLastUserId(
+		@PositiveOrZero @Param("lastUserId") int lastUserId,
+		@Positive @Param("count") int count
+	);
 }

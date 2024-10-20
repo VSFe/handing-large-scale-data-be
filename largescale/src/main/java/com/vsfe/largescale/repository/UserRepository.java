@@ -21,4 +21,14 @@ public class UserRepository {
 	public List<User> findRecentCreatedUsers(int count) {
 		return userJpaRepository.findRecentCreatedUsers(count);
 	}
+
+	/**
+	 *
+	 * @param lastUserId
+	 * @param count
+	 * @return
+	 */
+	public List<User> findUsersWithLastUserId(int lastUserId, int count) {
+		return userJpaRepository.findUsersWithLastUserId(lastUserId, count);
+	}
 }
