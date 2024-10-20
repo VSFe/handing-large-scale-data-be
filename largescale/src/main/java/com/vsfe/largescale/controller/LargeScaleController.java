@@ -1,16 +1,20 @@
 package com.vsfe.largescale.controller;
 
+import com.vsfe.largescale.controller.model.AggregateRequest;
 import com.vsfe.largescale.domain.Transaction;
 import com.vsfe.largescale.domain.User;
 import com.vsfe.largescale.model.PageInfo;
 import com.vsfe.largescale.model.type.TransactionSearchOption;
 import com.vsfe.largescale.service.LargeScaleService;
+
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -60,14 +64,14 @@ public class LargeScaleController {
      * Step 4. 병렬 처리를 사용한 마이그레이션 작업을 수행해 봅시다.
      */
     @GetMapping("/migrate-data")
-    public void migrateData() {
-        largeScaleService.migrateData();
+    public void migrateData(@RequestParam int pageSize) {
+        largeScaleService.migrateData(pageSize);
     }
 
     /**
      * Step 5. 데이터를 샤딩한다면 어떻게 될까요?
      */
-    public void aggregateTransactionsWithSharding() {
+    public void aggregateTransactionsWithSharding(@RequestBody @Valid AggregateRequest request) {
 
     }
 }

@@ -15,6 +15,8 @@ import com.vsfe.largescale.util.C4StringUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -25,10 +27,8 @@ import java.util.stream.IntStream;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class LargeScaleService {
-    private final AccountRepository accountRepository;
-    private final TransactionRepository transactionRepository;
-    private final UserRepository userRepository;
+public class LargeScaleService implements InitializingBean {
+    private static final int LIMIT_SIZE = 1000;
 
     /**
      * 일반적으로 ThreadPool을 Bean 으로 선언해서 사용하는 편인데, (요청이 들어올 때 마다 스레드풀이 생성되는 것을 방지하기 위함)
@@ -36,7 +36,14 @@ public class LargeScaleService {
      * CompletableFuture 에 대해 아시면 다른 방식으로도 가능합니다. (default ForkJoinPool 을 사용한 처리 가능)
      */
     private final C4ThreadPoolExecutor threadPoolExecutor = new C4ThreadPoolExecutor(8, 32);
+    private final AccountRepository accountRepository;
+    private final TransactionRepository transactionRepository;
+    private final UserRepository userRepository;
 
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        threadPoolExecutor.init();
+    }
 
     /**
      * 최신 유저의 목록을 가져온다.
@@ -72,8 +79,8 @@ public class LargeScaleService {
      * @param pageSize
      */
     public void validateAccountNumber(int pageSize) {
-        C4QueryExecuteTemplate.<Account>selectAndExecuteWithCursorAndPageLimit(pageSize, 1000,
-            lastAccount -> accountRepository.findAccountByLastAccountId(lastAccount == null ? null : lastAccount.getId(), 1000),
+        C4QueryExecuteTemplate.<Account>selectAndExecuteWithCursorAndPageLimit(pageSize, LIMIT_SIZE,
+            lastAccount -> accountRepository.findAccountByLastAccountId(lastAccount == null ? null : lastAccount.getId(), LIMIT_SIZE),
             accounts -> accounts.forEach(this::validateAccount)
         );
     }
@@ -84,9 +91,9 @@ public class LargeScaleService {
      * @param pageSize
      */
     public void migrateData(int pageSize) {
-        C4QueryExecuteTemplate.<User>selectAndExecuteWithCursorAndPageLimit(pageSize, 100,
-            lastUser -> userRepository.findRecentCreatedUsers(1),
-            users -> users.forEach(this::doSomething)
+        C4QueryExecuteTemplate.<User>selectAndExecuteWithCursorAndPageLimit(pageSize, LIMIT_SIZE,
+            lastUser -> userRepository.findUsersWithLastUserId(lastUser == null ? 0 : lastUser.getId(), LIMIT_SIZE),
+            users -> users.forEach(this::migrateUserInfo)
         );
 
         threadPoolExecutor.waitToEnd();
@@ -94,9 +101,9 @@ public class LargeScaleService {
 
     /**
      * 샤딩한 데이터를 기반으로, 통계 집계를 수행합니다.
-     * @param today
+     * @param userIds
      */
-    public void aggregateTransactionsWithSharding(Instant today) {
+    public void aggregateTransactionsWithSharding(List<String> userIds) {
         // 실력이 있으시다면... executorService 에 일종의 callback 을 정의해서 삽입해서 처리할 수도 있습니다.
         // 여기서는 빙빙 돌아가도 좀 덜 어려운 방식으로 구현할게요.
 
@@ -122,14 +129,25 @@ public class LargeScaleService {
      * 유저 정보를 기반으로...
      * @param user
      */
-    private void doSomething(User user) {
+    private void migrateUserInfo(User user) {
         threadPoolExecutor.execute(() -> {
+            var userId = user.getId();
             var groupId = user.getGroupId();
 
             // 계좌번호 페이징으로 가져옴
             // 1 - 계좌번호 데이터를 groupId 에 해당 하는 곳에 삽입
             // 2 - 계좌번호 기반으로 쿼리를 호출하여, 거래 내역을 가져옴
             // 3 - 해당 거래 내역을 groupId 에 맞춰서 삽입
+            C4QueryExecuteTemplate.<Account>selectAndExecuteWithCursor(LIMIT_SIZE,
+                lastAccount -> accountRepository.findAccountByUserIdAndLastAccountId(userId, lastAccount == null ? null : lastAccount.getId(), LIMIT_SIZE),
+                accounts -> {
+                    // 삽입은 한 번에 - 쿼리 중복 호출 방지
+                    accountRepository.saveAll(groupId, accounts);
+                    // 조회 후 삽입 - 사실 데이터의 양에 따라 추천 여부가 갈리지만... 이런 방법이 있다도 경험해보는걸로
+                    accounts.forEach(account -> transactionRepository.selectAndMigrate(account,
+                        C4StringUtil.format("transaction_migration_test_{}", groupId)));
+                }
+            );
         });
     }
 
