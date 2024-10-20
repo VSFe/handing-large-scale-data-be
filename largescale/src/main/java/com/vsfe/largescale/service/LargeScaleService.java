@@ -88,7 +88,7 @@ public class LargeScaleService {
 
         C4QueryExecuteTemplate.<User>selectAndExecuteWithCursorAndPageLimit(pageSize, LIMIT_SIZE,
             lastUser -> userRepository.findUsersWithLastUserId(lastUser == null ? 0 : lastUser.getId(), 1000),
-            users -> users.forEach(this::migrateUserInfo)
+            users -> users.forEach(user -> threadPoolExecutor.execute(() -> migrateUserInfo(user)))
         );
 
         threadPoolExecutor.waitToEnd();
